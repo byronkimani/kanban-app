@@ -1,19 +1,34 @@
-import { useSortable } from "@dnd-kit/sortable";
+import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import DeleteIcon from "../icons/DeleteIcon";
-import { Column, Id } from "../models";
+import { Column, Id, Task } from "../models";
 import { CSS } from "@dnd-kit/utilities";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import TaskCard from "./TaskCard";
 
 interface Props {
   column: Column;
   deleteColumn: (id: Id) => void;
   updateColumn: (id: Id, title: string) => void;
+  createTask: (columnId: Id) => void;
+  updateTask: (id: Id, description: string) => void;
+  deleteTask: (id: Id) => void;
+  tasks: Task[];
 }
 
 function ColumnComponent(props: Props) {
-  const { column, deleteColumn, updateColumn } = props;
+  const {
+    column,
+    deleteColumn,
+    updateColumn,
+    createTask,
+    tasks,
+    updateTask,
+    deleteTask,
+  } = props;
   const [editMode, setEditMode] = useState(false);
+  const taskIds = useMemo(() => tasks.map((task) => task.id), [tasks]);
 
+  // hook from dnd that allows drag on drop of columns
   const {
     setNodeRef,
     attributes,
@@ -30,6 +45,7 @@ function ColumnComponent(props: Props) {
     disabled: editMode,
   });
 
+  // CSS style for the dragging animation
   const style = {
     transition,
     transform: CSS.Transform.toString(transform),
@@ -40,14 +56,13 @@ function ColumnComponent(props: Props) {
       <div
         className="
     bg-columnBackgroundColor
-    w-[350px]
+    w-[250px]
     h-[500px]
     max-h-[500px]
     rounded-md
     flex
     flex-col
     opacity-70
-    border-rose-500
     "
       ></div>
     );
@@ -58,7 +73,7 @@ function ColumnComponent(props: Props) {
       style={style}
       className="
     bg-columnBackgroundColor
-    w-[350px]
+    w-[250px]
     h-[500px]
     max-h-[500px]
     rounded-md
@@ -80,7 +95,6 @@ function ColumnComponent(props: Props) {
        rounded-b-none
        p-3
        font-bold
-       border-columnBackgroundColor
        border-4
        flex
        items-center
@@ -93,24 +107,10 @@ function ColumnComponent(props: Props) {
         gap-4
         "
         >
-          <div
-            className="
-        flex
-        justify-center
-        items-center
-        bg-columnBackgroundColor
-        px-2
-        py-1
-        text-sm
-        rounded-full
-        "
-          >
-            0
-          </div>
           {!editMode && column.title}
           {editMode && (
             <input
-              className="bg-black focus:border-rose-500 border rounded outline-none px-2"
+              className="bg-white border rounded outline-none px-2 w-[80%]"
               autoFocus
               value={column.title}
               onChange={(e) => updateColumn(column.id, e.target.value)}
@@ -139,10 +139,22 @@ function ColumnComponent(props: Props) {
       </div>
 
       {/* content */}
-      <div className="flex flex-grow">Content</div>
+      <div className="flex flex-grow flex-col gap-4 p-2 overflow-x-hidden overflow-y-auto">
+        <SortableContext items={taskIds}>
+          {tasks.map((task) => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              deleteTask={deleteTask}
+              updateTask={updateTask}
+            ></TaskCard>
+          ))}
+        </SortableContext>
+      </div>
       {/* footer */}
-      <button className="border-columnBackgroundColor border-2 rounded-md p-4 border-x-columnBackgroundColor"
-      onClick={() => createTask(column.id)}
+      <button
+        className="border-columnBackgroundColor border-2 rounded-md p-4 border-x-columnBackgroundColor"
+        onClick={() => createTask(column.id)}
       >
         Add Task
       </button>
