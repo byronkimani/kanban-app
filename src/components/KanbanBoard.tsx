@@ -61,10 +61,11 @@ function KanbanBoard() {
                 <ColumnComponent
                   key={col.id}
                   column={col}
-                  updateColumn={() => updateColumn}
+                  updateColumn={updateColumn}
                   deleteColumn={() => {
                     deleteColumn(col.id);
                   }}
+                  clearColumn={clearColumn}
                   createTask={createTask}
                   tasks={tasks.filter((task) => task.columnId === col.id)}
                   deleteTask={deleteTask}
@@ -73,11 +74,12 @@ function KanbanBoard() {
               ))}
             </SortableContext>
           </div>
-          <button
-            onClick={() => {
-              createColumn();
-            }}
-            className="
+          {columns.length < 5 && (
+            <button
+              onClick={() => {
+                createColumn();
+              }}
+              className="
       h-[40px]
       w-[200px]
       rounded-lg
@@ -85,9 +87,10 @@ function KanbanBoard() {
       border-2
       text-white
       "
-          >
-            Add Column
-          </button>
+            >
+              Add Column
+            </button>
+          )}
         </div>
         {createPortal(
           <DragOverlay>
@@ -97,6 +100,7 @@ function KanbanBoard() {
                 updateColumn={updateColumn}
                 deleteColumn={deleteColumn}
                 createTask={createTask}
+                clearColumn={clearColumn}
                 tasks={tasks.filter(
                   (task) => task.columnId === activeColumn.id
                 )}
@@ -129,11 +133,17 @@ function KanbanBoard() {
   }
 
   function updateColumn(id: Id, title: string) {
+    console.log("test");
     const updatedColumns = columns.map((col) => {
       if (col.id !== id) return col;
       return { ...col, title };
     });
     setColumns(updatedColumns);
+  }
+
+  function clearColumn(id: Id) {
+    const filteredTasks = tasks.filter((t) => t.columnId !== id);
+    setTasks(filteredTasks);
   }
 
   function deleteColumn(id: Id) {
