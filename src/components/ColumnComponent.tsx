@@ -1,9 +1,9 @@
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
-import DeleteIcon from "../icons/DeleteIcon";
 import { Column, Id, Task } from "../models";
 import { CSS } from "@dnd-kit/utilities";
 import { useMemo, useState } from "react";
 import TaskCard from "./TaskCard";
+import DeleteIcon from "../icons/DeleteIcon";
 
 interface Props {
   column: Column;
@@ -12,6 +12,7 @@ interface Props {
   createTask: (columnId: Id) => void;
   updateTask: (id: Id, description: string) => void;
   deleteTask: (id: Id) => void;
+  clearColumn: (id: Id) => void;
   tasks: Task[];
 }
 
@@ -23,6 +24,7 @@ function ColumnComponent(props: Props) {
     createTask,
     tasks,
     updateTask,
+    clearColumn,
     deleteTask,
   } = props;
   const [editMode, setEditMode] = useState(false);
@@ -113,7 +115,9 @@ function ColumnComponent(props: Props) {
               className="bg-white border rounded outline-none px-2 w-[80%]"
               autoFocus
               value={column.title}
-              onChange={(e) => updateColumn(column.id, e.target.value)}
+              onChange={(e) => {
+                updateColumn(column.id, e.target.value);
+              }}
               onBlur={() => setEditMode(false)}
               onKeyDown={(e) => {
                 if (e.key !== "Enter") return;
@@ -127,8 +131,6 @@ function ColumnComponent(props: Props) {
           onClick={() => deleteColumn(column.id)}
           className="
         stroke-gray-500
-        hover:stroke-white
-        hover: bg-columnBackgroundColor
         rounded
         px-1
         py-2
@@ -153,10 +155,16 @@ function ColumnComponent(props: Props) {
       </div>
       {/* footer */}
       <button
-        className="border-columnBackgroundColor border-2 rounded-md p-4 border-x-columnBackgroundColor"
+        className="bg-mainBackgroundColor m-2 mb-0 p-2 rounded-lg flex-row"
         onClick={() => createTask(column.id)}
       >
         Add Task
+      </button>
+      <button
+        className="bg-mainBackgroundColor m-2 p-2 rounded-lg flex-row text-red-500"
+        onClick={() => clearColumn(column.id)}
+      >
+        Clear Column
       </button>
     </div>
   );
